@@ -890,10 +890,22 @@ class Scene(Geometry3D):
         ---------
         hull: Trimesh object, convex hull of all meshes in scene
         """
+        hull = convex.repair_windings_and_normals(self._convex_hull_raw)
+        return hull
+
+    @caching.cache_decorator
+    def _convex_hull_raw(self):
+        """
+        The convex hull of the whole scene without repairing face windings and normals
+
+        Returns
+        ---------
+        hull: Trimesh object, convex hull of all meshes in scene
+        """
         points = util.vstack_empty(
             [m.vertices
              for m in self.dump()])
-        hull = convex.convex_hull(points)
+        hull = convex.convex_hull(points, repair=False)
         return hull
 
     def export(self,

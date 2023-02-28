@@ -67,12 +67,39 @@ def convex_hull(obj, qhull_options='QbB Pp Qt', repair=True):
     # rescale vertices back to original size
     vertices = hull.points[vid].copy()
 
+    # create the Trimesh object for the convex hull
+    convex_raw = Trimesh(vertices=vertices,
+                         faces=faces,
+                         process=True,
+                         validate=False)
+
     if not repair:
-        # create the Trimesh object for the convex hull
-        return Trimesh(vertices=vertices,
-                       faces=faces,
-                       process=True,
-                       validate=False)
+        return convex_raw
+
+    # repair face windings returned by qhull
+    return repair_windings_and_normals(convex_raw, qhull_options)
+
+
+def repair_windings_and_normals(obj, qhull_options='QbB Pp Qt'):
+    """
+    Repair face windings and normals from ConvexHull (qhull).
+
+    Parameters
+    ----------
+    obj : Trimesh
+      Convex hull with random face windings.
+    qhull_options : str
+      Qhull options used when creating convex hull.
+
+    Returns
+    ----------
+    convex : Trimesh
+      Mesh of convex hull with repaired face windings and normals.
+    """
+    from .base import Trimesh
+
+    vertices = obj.vertices.view(np.ndarray)
+    faces = obj.faces.view(np.ndarray)
 
     # qhull returns faces with random winding
     # calculate the returned normal of each face

@@ -647,7 +647,20 @@ class PointCloud(Geometry3D):
           A watertight mesh of the hull of the points
         """
         from . import convex
-        return convex.convex_hull(self.vertices)
+        return convex.repair_windings_and_normals(self._convex_hull_raw)
+
+    @caching.cache_decorator
+    def _convex_hull_raw(self):
+        """
+        A convex hull of every point (with random face windings from qhull).
+
+        Returns
+        -------------
+        convex_hull : trimesh.Trimesh
+          A watertight mesh of the hull of the points
+        """
+        from . import convex
+        return convex.convex_hull(self.vertices, repair=False)
 
     def scene(self):
         """

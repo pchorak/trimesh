@@ -2324,7 +2324,21 @@ class Trimesh(Geometry3D):
         convex : trimesh.Trimesh
           Mesh of convex hull of current mesh
         """
-        hull = convex.convex_hull(self)
+        hull = convex.repair_windings_and_normals(self._convex_hull_raw)
+        return hull
+
+    @caching.cache_decorator
+    def _convex_hull_raw(self):
+        """
+        Returns a Trimesh object representing the convex hull of
+        the current mesh without repairing face windings and normals.
+
+        Returns
+        --------
+        convex : trimesh.Trimesh
+          Mesh of convex hull of current mesh
+        """
+        hull = convex.convex_hull(self, repair=False)
         return hull
 
     def sample(self, count, return_index=False, face_weight=None):
